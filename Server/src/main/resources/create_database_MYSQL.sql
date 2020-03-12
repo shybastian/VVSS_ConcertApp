@@ -37,4 +37,4 @@ CREATE TABLE `transactions` (
     KEY `transactions_users_idx` (`UsernameVanzator`),
     CONSTRAINT `transactions_concert` FOREIGN KEY (`idConcert`) REFERENCES `concerts` (`idConcert`),
     CONSTRAINT `transactions_users` FOREIGN KEY (`UsernameVanzator`) REFERENCES `users` (`Username`)
-)
+);
