@@ -35,5 +35,3 @@ CREATE TABLE transactions (
     CONSTRAINT transactions_concerts FOREIGN KEY (idConcert) REFERENCES concerts(idConcert),
     CONSTRAINT transactions_users FOREIGN KEY (UsernameVanzator) REFERENCES users(Username),
 );
-
-GO;
