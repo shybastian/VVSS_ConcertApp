@@ -13,6 +13,8 @@ import java.util.Properties;
 public class JDBCUtils {
     private Properties properties = new Properties();
     private static final Logger logger = LogManager.getLogger(JDBCUtils.class);
+    //TODO change this
+    private static final String propertiesFile = "D:\\Facultate\\Semestrul4\\MPP-HomeWorks\\ClientServerFinal\\Server\\src\\main\\resources\\bd.config";
 
     private Connection instance = null;
 
@@ -21,7 +23,7 @@ public class JDBCUtils {
         try
         {
             logger.traceEntry();
-            properties.load(new FileInputStream("D:\\Facultate\\Semestrul4\\MPP-HomeWorks\\ClientServerFinal\\Server\\src\\main\\resources\\bd.config"));
+            properties.load(new FileInputStream(propertiesFile));
             logger.trace("Loaded DB Properties");
         } catch (IOException ex)
         {
@@ -41,7 +43,6 @@ public class JDBCUtils {
         Connection connection = null;
         try
         {
-            //Class.forName(driver);
             connection = DriverManager.getConnection(url,user,password);
             logger.trace("Created Connection");
         } catch (SQLException ex)
@@ -49,11 +50,6 @@ public class JDBCUtils {
             logger.warn(ex.toString());
             ex.printStackTrace();
         }
-//        catch (ClassNotFoundException ex)
-//        {
-//            logger.warn(ex.toString());
-//            ex.printStackTrace();
-//        }
         logger.traceExit();
         return connection;
     }
