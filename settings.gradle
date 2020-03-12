@@ -1,0 +1,8 @@
+rootProject.name = 'ClientServerFinal'
+include 'CommonResources'
+include 'Networking'
+include 'Client'
+include 'Server'
+include 'Service'
+include 'Services'
+

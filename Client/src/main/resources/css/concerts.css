@@ -1,0 +1,31 @@
+.root{
+    -fx-background-image: url("backgrounds/concert.jpg");
+    -fx-background-size: /*500 height,500 width*/ auto;
+    -fx-background-color: white;
+}
+
+.label{
+    /*font-family: myFont;*/
+    -fx-font-family: "Ink Free";
+    -fx-font-size: 15px bold;
+    -fx-border-color: white 5px;
+    -fx-color-label-visible: white;
+    -fx-border-radius: 3px;
+    -fx-background-color: #00cde8;
+    -fx-background-size: 5px;
+    -fx-background-radius: 3px;
+}
+
+.button{
+    -fx-font-family: "Ink Free";
+    -fx-font-size: 15px;
+    -fx-background-color: #00cde8;
+    -fx-text-alignment: center;
+    -fx-border-radius: 12px;
+    -fx-border-color: 2px solid blue;
+}
+
+.text-field{
+    -fx-border-color: #8d95d2;
+    -fx-background-color: #4a3d98;
+}

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="600.0" prefWidth="600.0" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ControllerMenu">
+   <children>
+      <Button fx:id="buttonShowAll" layoutX="164.0" layoutY="191.0" mnemonicParsing="false" onAction="#moveToShowAll" prefHeight="61.0" prefWidth="278.0" text="Show all Concerts" />
+      <Button fx:id="buttonSearchByDate" layoutX="164.0" layoutY="321.0" mnemonicParsing="false" onAction="#moveToSearchByDate" prefHeight="61.0" prefWidth="278.0" text="Show Concerts with given Date" />
+      <Button fx:id="buttonLogOut" layoutX="273.0" layoutY="561.0" mnemonicParsing="false" onAction="#logOut" text="Log Out" />
+   </children>
+</AnchorPane>

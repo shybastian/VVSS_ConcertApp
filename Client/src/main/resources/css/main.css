@@ -1,0 +1,36 @@
+.root{
+    -fx-background-image: url("backgrounds/background1.jpg");
+    -fx-background-size: /*500 height,500 width*/ auto;
+    -fx-background-color: white;
+}
+
+/*@font-face {*/
+    /*font-family: "myFont";*/
+    /*src: url("fonts/FreudianOneDemo.ttf");*/
+/*}*/
+
+.label{
+    /*font-family: myFont;*/
+    -fx-font-family: "Ink Free";
+    -fx-font-size: 25px bold;
+    -fx-border-color: black 5px;
+    -fx-color-label-visible: white;
+    -fx-border-radius: 3px;
+    -fx-background-color: #CC855B;
+    -fx-background-size: 5px;
+    -fx-background-radius: 3px;
+}
+
+.button{
+    -fx-font-family: "Ink Free";
+    -fx-font-size: 15px;
+    -fx-background-color: #BDD0A2;
+    -fx-text-alignment: center;
+    -fx-border-radius: 12px;
+    -fx-border-color: 2px solid blue;
+}
+
+.text-field{
+    -fx-border-color: purple;
+    -fx-background-color: #b94a80;
+}
