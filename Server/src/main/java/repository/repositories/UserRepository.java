@@ -14,17 +14,18 @@ import java.sql.SQLException;
 public class UserRepository implements IUserRepository {
     private static final Logger logger = LogManager.getLogger(UserRepository.class);
     private Connection connection;
+    private static final String selectUsernameForLogin = "select Username from users where Username = Any (select Username from users where Username=? and Password=?)";;
+
 
     @Override
     public User login(User user) {
         logger.traceEntry();
         connection = new JDBCUtils().getConnection();
         logger.trace("Connection established");
-        String sqlString = "select Username from users where Username = Any (select Username from users where Username=? and Password=?)";
         try {
             connection.setAutoCommit(false);
             logger.trace("Trying to find user="+user.getUsername()+" passw="+user.getPassword());
-            PreparedStatement preparedStatement = connection.prepareStatement(sqlString);
+            PreparedStatement preparedStatement = connection.prepareStatement(selectUsernameForLogin);
             preparedStatement.setString(1,user.getUsername());
             preparedStatement.setString(2,user.getPassword());
             ResultSet resultSet = preparedStatement.executeQuery();
