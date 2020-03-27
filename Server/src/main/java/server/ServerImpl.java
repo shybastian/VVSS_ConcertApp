@@ -97,7 +97,11 @@ public class ServerImpl implements IServer {
         if (check)
         {
             transactionService.addTransaction(toCheck);
-            concertService.updateConcert(concertID,ticketsBought);
+            try {
+                concertService.updateConcert(concertID,ticketsBought);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         else
         {
