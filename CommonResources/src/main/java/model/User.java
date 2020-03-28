@@ -2,6 +2,8 @@ package model;
 
 import java.io.Serializable;
 
+
+
 public class User implements Serializable {
     String username, password;
 
@@ -9,6 +11,8 @@ public class User implements Serializable {
         this.username = username;
         this.password = password;
     }
+
+    public User() { }
 
     public String getUsername() {
         return username;
