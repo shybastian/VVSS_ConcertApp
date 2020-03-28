@@ -1,3 +1,4 @@
+use vvssfestival;
 insert into users (Username, Password) VALUES ('admin', 'admin');
 insert into users (Username, Password) VALUES ('test', 'test');
 insert into users (Username, Password) VALUES ('benta', 'benta');

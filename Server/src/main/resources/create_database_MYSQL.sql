@@ -1,4 +1,5 @@
 CREATE DATABASE VVSSFestival;
+use vvssfestival;
 
 CREATE TABLE `users` (
     `Username` varchar(45) NOT NULL,
