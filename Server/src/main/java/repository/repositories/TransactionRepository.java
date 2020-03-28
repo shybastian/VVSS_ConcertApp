@@ -14,7 +14,8 @@ import java.sql.SQLException;
 public class TransactionRepository implements ITransactionRepository {
     private Connection connection;
     private static final Logger logger = LogManager.getLogger(TransactionRepository.class);
-
+    private final String insertTransaction = "insert into transactions(UsernameVanzator,Cumparator,idConcert,TicheteCumparate) " +
+            "values(?,?,?,?)";
     @Override
     public Transactions findOne(int idTransaction) {
         logger.traceEntry();
@@ -55,13 +56,7 @@ public class TransactionRepository implements ITransactionRepository {
             connection = new JDBCUtils().getConnection();
             logger.traceEntry("Established Connection");
             connection.setAutoCommit(false);
-            String sqlUpdate = "insert into transactions(UsernameVanzator,Cumparator,idConcert,TicheteCumparate) " +
-                    "values(?,?,?,?)";
-            PreparedStatement preparedStatement = connection.prepareStatement(sqlUpdate);
-            preparedStatement.setString(1, transaction.getSellerUsername());
-            preparedStatement.setString(2, transaction.getBuyerName());
-            preparedStatement.setInt(3, transaction.getIdConcert());
-            preparedStatement.setInt(4, transaction.getBoughtTickets());
+            PreparedStatement preparedStatement = prepareInsertStatement(transaction);
             logger.traceEntry("Trying to execute add");
             preparedStatement.executeUpdate();
             logger.traceEntry("Updated successfully");
@@ -73,6 +68,15 @@ public class TransactionRepository implements ITransactionRepository {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private PreparedStatement prepareInsertStatement(Transactions transaction) throws SQLException {
+        PreparedStatement preparedStatement = connection.prepareStatement(insertTransaction);
+        preparedStatement.setString(1, transaction.getSellerUsername());
+        preparedStatement.setString(2, transaction.getBuyerName());
+        preparedStatement.setInt(3, transaction.getIdConcert());
+        preparedStatement.setInt(4, transaction.getBoughtTickets());
+        return preparedStatement;
     }
 
     @Override

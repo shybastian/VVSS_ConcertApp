@@ -14,7 +14,7 @@ public class JDBCUtils {
     private Properties properties = new Properties();
     private static final Logger logger = LogManager.getLogger(JDBCUtils.class);
     //TODO change this
-    private static final String propertiesFile = "D:\\Facultate\\Semestrul4\\MPP-HomeWorks\\ClientServerFinal\\Server\\src\\main\\resources\\bd.config";
+    private static final String propertiesFile = "D:\\An III\\VVSS\\Project\\Server\\src\\main\\resources\\bd.config";
 
     private Connection instance = null;
 
