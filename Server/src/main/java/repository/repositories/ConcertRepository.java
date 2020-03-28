@@ -15,7 +15,10 @@ import java.util.List;
 public class ConcertRepository implements IConcertRepository {
     private Connection connection;
     private static final Logger logger = LogManager.getLogger(ConcertRepository.class);
-
+    private static final String selectConcertFiltered = "select idConcert, Artist, Locatie, Data, Ora, BileteTotale, BileteVandute from concerts where Data=?";
+    private static final String updateConcert = "update concerts set BileteVandute = ? where idConcert = ?";
+    private static final String selectSoldTickets = "select BileteVandute from concerts where idConcert=?";
+    private static final String selectAllConcerts = "select * from concerts";
 
     @Override
     public Iterable<Concert> filterConcerts(LocalDate date) {
@@ -25,22 +28,13 @@ public class ConcertRepository implements IConcertRepository {
             logger.trace("Established Connection");
             connection.setAutoCommit(false);
             List<Concert> filteredConcerts = new ArrayList<>();
-            String sqlQuery = "select idConcert, Artist, Locatie, Data, Ora, BileteTotale, BileteVandute from concerts where Data=?";
-            PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery);
+            PreparedStatement preparedStatement = connection.prepareStatement(selectConcertFiltered);
             System.out.println(date.toString());
             preparedStatement.setDate(1, Date.valueOf(date));
             ResultSet resultSet = preparedStatement.executeQuery();
             logger.trace("Executed Query for Date=" + date.toString());
             while (resultSet.next()) {
-                int id = resultSet.getInt(1);
-                String artist = resultSet.getString(2);
-                String location = resultSet.getString(3);
-                LocalDate data = resultSet.getDate(4).toLocalDate();
-                LocalTime time = resultSet.getTime(5).toLocalTime();
-                int totalTickets = resultSet.getInt(6);
-                int soldTickets = resultSet.getInt(7);
-
-                Concert toAddConcert = new Concert(id, artist, totalTickets, soldTickets, location, data, time);
+                Concert toAddConcert = determineConcertFromResultSet(resultSet);
                 logger.trace("Got Information=" + toAddConcert.toString());
                 filteredConcerts.add(toAddConcert);
                 logger.trace("Added information to List");
@@ -100,28 +94,12 @@ public class ConcertRepository implements IConcertRepository {
             connection = new JDBCUtils().getConnection();
             logger.traceEntry("Established connection");
             connection.setAutoCommit(false);
-            String sqlQuery = "select BileteVandute from concerts where idConcert=?";
-            PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery);
-            preparedStatement.setInt(1,concertID);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            int soldTickets = 0;
-            while (resultSet.next())
-            {
-                soldTickets = resultSet.getInt(1);
-                logger.trace("Got value: " + soldTickets);
-            }
+            int soldTickets = determineCurrentNumberOfSoldTickets(concertID);
 
             connection.commit();
 
             logger.trace("Preparing to update idConcert=" + concertID + "with currentTickets=" + soldTickets);
-            String sqlUpdate = "update concerts set BileteVandute = ? where idConcert = ?";
-            int updatedTickets = soldTickets + ticketsToAdd;
-            logger.trace("Updating currentTickets to: " + updatedTickets + " ...");
-            PreparedStatement preparedStatementUpdate = connection.prepareStatement(sqlUpdate);
-            preparedStatementUpdate.setInt(1,updatedTickets);
-            preparedStatementUpdate.setInt(2,concertID);
-            preparedStatementUpdate.executeUpdate();
-            logger.trace("Executed Update: idConcert=" + concertID + " changedValue=" + updatedTickets);
+            updateNumberOfSoldTickets(concertID, ticketsToAdd, soldTickets);
             connection.commit();
             logger.traceEntry("Committed transaction");
             connection.setAutoCommit(true);
@@ -135,6 +113,29 @@ public class ConcertRepository implements IConcertRepository {
         }
         logger.traceExit();
 
+    }
+
+    private void updateNumberOfSoldTickets(int concertID, int ticketsToAdd, int soldTickets) throws SQLException {
+        int updatedTickets = soldTickets + ticketsToAdd;
+        logger.trace("Updating currentTickets to: " + updatedTickets + " ...");
+        PreparedStatement preparedStatementUpdate = connection.prepareStatement(updateConcert);
+        preparedStatementUpdate.setInt(1,updatedTickets);
+        preparedStatementUpdate.setInt(2,concertID);
+        preparedStatementUpdate.executeUpdate();
+        logger.trace("Executed Update: idConcert=" + concertID + " changedValue=" + updatedTickets);
+    }
+
+    private int determineCurrentNumberOfSoldTickets(int concertID) throws SQLException {
+        PreparedStatement preparedStatement = connection.prepareStatement(selectSoldTickets);
+        preparedStatement.setInt(1,concertID);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        int soldTickets = 0;
+        while (resultSet.next())
+        {
+            soldTickets = resultSet.getInt(1);
+            logger.trace("Got value: " + soldTickets);
+        }
+        return soldTickets;
     }
 
     @Override
@@ -155,20 +156,11 @@ public class ConcertRepository implements IConcertRepository {
             connection = new JDBCUtils().getConnection();
             logger.trace("Established connection");
             connection.setAutoCommit(false);
-            String sqlQuery = "select * from concerts";
-            PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery);
+            PreparedStatement preparedStatement = connection.prepareStatement(selectAllConcerts);
             ResultSet resultSet = preparedStatement.executeQuery();
             while(resultSet.next())
             {
-                int idConcert = resultSet.getInt(1);
-                String artist = resultSet.getString(2);
-                String location = resultSet.getString(3);
-                LocalDate date = resultSet.getDate(4).toLocalDate();
-                LocalTime time = resultSet.getTime(5).toLocalTime();
-                int totalTickets = resultSet.getInt(6);
-                int soldTickets = resultSet.getInt(7);
-
-                Concert toAddConcert = new Concert(idConcert,artist,totalTickets,soldTickets,location,date,time);
+                Concert toAddConcert = determineConcertFromResultSet(resultSet);
                 allConcerts.add(toAddConcert);
             }
             connection.commit();
@@ -179,5 +171,17 @@ public class ConcertRepository implements IConcertRepository {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private Concert determineConcertFromResultSet(ResultSet resultSet) throws SQLException {
+        int idConcert = resultSet.getInt(1);
+        String artist = resultSet.getString(2);
+        String location = resultSet.getString(3);
+        LocalDate date = resultSet.getDate(4).toLocalDate();
+        LocalTime time = resultSet.getTime(5).toLocalTime();
+        int totalTickets = resultSet.getInt(6);
+        int soldTickets = resultSet.getInt(7);
+
+        return new Concert(idConcert, artist, totalTickets, soldTickets, location, date, time);
     }
 }

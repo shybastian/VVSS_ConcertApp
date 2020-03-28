@@ -92,6 +92,7 @@ public class ClientRPCWorker implements Runnable, IObserver {
                 connected = false;
                 return new Response.Builder().type(ResponseType.ERROR).data(ex.getMessage()).build();
             }
+            //  This is a test commentary.
         }
 
         if (request.type() == RequestType.LOGOUT)
