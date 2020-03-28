@@ -20,6 +20,15 @@ public class Concert implements Serializable {
         this.time = time;
     }
 
+    public Concert(String artist, String location, LocalDate date, LocalTime time, int totalTickets, int soldTickets) {
+        this.artist = artist;
+        this.totalTickets = totalTickets;
+        this.soldTickets = soldTickets;
+        this.location = location;
+        this.date = date;
+        this.time = time;
+    }
+
     public int getId() {
         return id;
     }

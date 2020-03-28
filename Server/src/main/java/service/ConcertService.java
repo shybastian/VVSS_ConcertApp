@@ -26,8 +26,7 @@ public class ConcertService {
         return concertRepository.filterConcerts(date);
     }
 
-    public void updateConcert(int idConcert, int soldTickets)
-    {
+    public void updateConcert(int idConcert, int soldTickets) throws Exception {
         concertRepository.update(idConcert, soldTickets);
     }
 

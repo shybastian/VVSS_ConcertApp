@@ -18,10 +18,13 @@ public class ConcertRepository implements IConcertRepository {
     private static final String selectConcertFiltered = "select idConcert, Artist, Locatie, Data, Ora, BileteTotale, BileteVandute from concerts where Data=?";
     private static final String updateConcert = "update concerts set BileteVandute = ? where idConcert = ?";
     private static final String selectSoldTickets = "select BileteVandute from concerts where idConcert=?";
+    private static final String selectTotalTickets = "select BileteTotale from concerts where idConcert=?";
     private static final String selectAllConcerts = "select * from concerts";
+    private static final String findOne = "select * from concerts where idConcert=?";
+    private static final String insert = "insert into concerts(Artist, Locatie, Data, Ora, BileteTotale, BileteVandute) VALUES (?, ?, ?, ?, ?, ?)";
 
     @Override
-    public Iterable<Concert> filterConcerts(LocalDate date) {
+    public List<Concert> filterConcerts(LocalDate date) {
         logger.traceEntry();
         try {
             connection = new JDBCUtils().getConnection();
@@ -54,8 +57,39 @@ public class ConcertRepository implements IConcertRepository {
     }
 
     @Override
-    public void add(Concert concert) {
-        throw new UnsupportedOperationException("Not yet implemented.");
+    public void add(Concert concert) throws Exception {
+
+        if (concert.getArtist().equals("") || concert.getArtist().length() > 50) {
+            throw new Exception("Artist name invalid");
+        }
+
+        if (concert.getTotalTickets() < 0 || concert.getSoldTickets() < 0) {
+            throw new Exception("Invalid tickets");
+        }
+
+        if (concert.getDate().isBefore(LocalDate.of(2019, 1, 1)) || concert.getDate().isAfter(LocalDate.of(2026, 1, 1))) {
+            throw new Exception("Invalid date");
+        }
+
+        try {
+            connection = new JDBCUtils().getConnection();
+            logger.trace("Established connection");
+            connection.setAutoCommit(false);
+            PreparedStatement preparedStatement = connection.prepareStatement(insert);
+            preparedStatement.setString(1, concert.getArtist());
+            preparedStatement.setString(2, concert.getLocation());
+            preparedStatement.setDate(3, Date.valueOf(concert.getDate()));
+            preparedStatement.setTime(4, Time.valueOf(concert.getTime()));
+            preparedStatement.setInt(5, concert.getTotalTickets());
+            preparedStatement.setInt(6, concert.getSoldTickets());
+
+            preparedStatement.executeUpdate();
+            connection.commit();
+            connection.setAutoCommit(true);
+            connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -64,37 +98,19 @@ public class ConcertRepository implements IConcertRepository {
     }
 
     //Overload
-    public void update(int concertID, int ticketsToAdd) {
-//        logger.traceEntry();
-//        try {
-//            connection = new JDBCUtils().getConnection();
-//            logger.trace("Established connection");
-//            connection.setAutoCommit(false);
-//            String sqlUpdate = "update concerts set BileteVandute = ? where idConcert = ?";
-//            PreparedStatement preparedStatement = connection.prepareStatement(sqlUpdate);
-//            preparedStatement.setInt(1, concert.getSoldTickets());
-//            preparedStatement.setInt(2, concert.getId());
-//            connection.commit();
-//            preparedStatement.executeUpdate();
-//            logger.trace("Executed Update: idConcert=" + concert.getId() + " changedValue=" + concert.getSoldTickets());
-//            connection.commit();
-//            logger.traceEntry("Committed transaction");
-//            connection.setAutoCommit(true);
-//            connection.close();
-//            logger.trace("Closed connection");
-//        } catch (SQLException e) {
-//            logger.warn(e.toString());
-//            e.printStackTrace();
-//        }
-//        logger.traceExit();
-
+    public void update(int concertID, int ticketsToAdd) throws Exception {
         logger.traceEntry();
         try
         {
             connection = new JDBCUtils().getConnection();
             logger.traceEntry("Established connection");
             connection.setAutoCommit(false);
-            int soldTickets = determineCurrentNumberOfSoldTickets(concertID);
+            int soldTickets = determineCurrentNumberOfTickets(concertID, selectSoldTickets);
+            int totalTickets = determineCurrentNumberOfTickets(concertID, selectTotalTickets);
+
+            if (totalTickets - soldTickets - ticketsToAdd < 0  || ticketsToAdd < 0) {
+                throw new Exception("Too few tickets left");
+            }
 
             connection.commit();
 
@@ -125,8 +141,8 @@ public class ConcertRepository implements IConcertRepository {
         logger.trace("Executed Update: idConcert=" + concertID + " changedValue=" + updatedTickets);
     }
 
-    private int determineCurrentNumberOfSoldTickets(int concertID) throws SQLException {
-        PreparedStatement preparedStatement = connection.prepareStatement(selectSoldTickets);
+    private int determineCurrentNumberOfTickets(int concertID, String query) throws SQLException {
+        PreparedStatement preparedStatement = connection.prepareStatement(query);
         preparedStatement.setInt(1,concertID);
         ResultSet resultSet = preparedStatement.executeQuery();
         int soldTickets = 0;
@@ -138,18 +154,40 @@ public class ConcertRepository implements IConcertRepository {
         return soldTickets;
     }
 
+
     @Override
     public void delete(Integer integer) {
         throw new UnsupportedOperationException("Not yet implemented.");
     }
 
     @Override
-    public Concert findOne(Integer integer) {
-        throw new UnsupportedOperationException("Not yet implemented.");
+    public Concert findOne(Integer idConcert) throws Exception {
+        if (idConcert < 0) {
+            throw new Exception("Invalid ID");
+        }
+        try {
+            connection = new JDBCUtils().getConnection();
+            logger.trace("Established connection");
+            connection.setAutoCommit(false);
+            PreparedStatement preparedStatement = connection.prepareStatement(findOne);
+            preparedStatement.setInt(1, idConcert);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while(resultSet.next())
+            {
+                return determineConcertFromResultSet(resultSet);
+            }
+            connection.commit();
+            connection.setAutoCommit(true);
+            connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
+
     @Override
-    public Iterable<Concert> findAll() {
+    public List<Concert> findAll() {
         logger.traceEntry();
         try {
             List<Concert> allConcerts = new ArrayList<>();
