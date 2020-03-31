@@ -96,8 +96,8 @@ public class ServerImpl implements IServer {
         boolean check = transactionService.validateTransaction(toCheck);
         if (check)
         {
-            transactionService.addTransaction(toCheck);
             try {
+                transactionService.addTransaction(toCheck);
                 concertService.updateConcert(concertID,ticketsBought);
             } catch (Exception e) {
                 e.printStackTrace();

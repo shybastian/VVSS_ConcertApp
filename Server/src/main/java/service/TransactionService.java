@@ -29,8 +29,7 @@ public class TransactionService {
         this.transactionRepoValidator = transactionRepoValidator;
     }
 
-    public void addTransaction(Transactions transaction)
-    {
+    public void addTransaction(Transactions transaction) throws Exception {
         transactionRepository.add(transaction);
     }
 

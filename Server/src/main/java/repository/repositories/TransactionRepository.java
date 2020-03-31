@@ -49,7 +49,11 @@ public class TransactionRepository implements ITransactionRepository {
     }
 
     @Override
-    public void add(Transactions transaction) {
+    public void add(Transactions transaction) throws Exception {
+        if (transaction.getBoughtTickets() < 0) throw new Exception("Bought Tickets is invalid");
+        if (transaction.getBuyerName().equals("") || transaction.getBuyerName().length() > 50) throw new Exception("Buyer Name invalid");
+        if (transaction.getSellerUsername().equals("") || transaction.getSellerUsername().length() > 50) throw new Exception ("Seller Name invalid");
+
         logger.traceEntry();
         try{
             logger.traceEntry("Trying to establish connection");
