@@ -1,5 +1,6 @@
 package server;
 
+import com.sun.jersey.json.impl.provider.entity.JSONArrayProvider;
 import model.Concert;
 import model.Transactions;
 import model.User;
@@ -84,10 +85,32 @@ public class ServerImpl implements IServer {
         Iterable<Concert> concertIterable = concertService.filterConcerts(date);
         concertIterable.forEach(concertFilteredList::add);
         if(concertFilteredList.isEmpty())
+        return filterConcertsByGivenDate(date);
         {
             throw new ApplicationException("No Concerts with given date: " + date + " have been found");
         }
-        return concertFilteredList;
+        //return concertFilteredList;
+    }
+
+
+    public List<Concert> filterConcertsByGivenDate(LocalDate date) throws ApplicationException {
+
+        if (date.isBefore(LocalDate.now())) {
+            throw new ApplicationException("You can't see concerts from the past!");
+        } else if (date.isAfter(LocalDate.of(2023, 1, 1))) {
+            throw new ApplicationException("The date is too far in the future!");
+        } else {
+            Iterable<Concert> allConcerts = concertService.findAll();
+            List<Concert> filteredConcerts = new ArrayList<>();
+
+            for(Concert concert : allConcerts) {
+                if (concert.getDate().equals(date)) {
+                    filteredConcerts.add(concert);
+                }
+            }
+
+            return filteredConcerts;
+        }
     }
 
     @Override
